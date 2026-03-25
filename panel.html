@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.5em;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            font-size: 2em;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        .menu-card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .menu-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .menu-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section-header h2 {
+            color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .user-card,
+        .announcement-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .user-card-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-owner {
+            background: #f39c12;
+            color: white;
+        }
+
+        .badge-admin {
+            background: #3498db;
+            color: white;
+        }
+
+        .badge-user {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 15px;
+            font-size: 0.85em;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .search-box::after {
+            content: '🔍';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .announcement-meta {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .role-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .role-option {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-option.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <h1>🎯 Panel de Control</h1>
+        <div class="user-info">
+            <span class="avatar" id="userAvatar">👤</span>
+            <div>
+                <div id="userName" style="font-weight: 600;"></div>
+                <div id="userRole" style="font-size: 0.85em; opacity: 0.9;"></div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="container">
+        <!-- Menú Principal -->
+        <div class="menu-grid" id="menuGrid">
+            <!-- Los botones se generan dinámicamente según el rol -->
+        </div>
+
+        <!-- Sección: Mi Perfil -->
+        <div class="content-section" id="profileSection">
+            <div class="section-header">
+                <h2>👤 Mi Perfil</h2>
+                <button class="btn" onclick="showMenu()">Volver al Menú</button>
+            </div>
+            <form onsubmit="updateProfile(event)">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="profileName" required>
+                </div>
+                <div class="form-group">
+                    <label>Avatar (emoji)</label>
+                    <input type="text" id="profileAvatar" maxlength="2" placeholder="😊">
+                </div>
+                <div class="form-group">
+                    <label>Biografía</label>
+                    <textarea id="profileBio" placeholder="Cuéntanos algo sobre ti..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Nueva Contraseña (dejar vacío para no cambiar)</label>
+                    <input type="password" id="profilePassword">
+                </div>
+                <button type="submit" class="btn">💾 Guardar Cambios</button>
+            </form>
+        </div>
+
+        <!-- Sección: Buscar Usuarios -->
+        <div class="content-section" id="searchSection">
+            <div class="section-header">
+                <h2>🔍 Buscar Usuarios</h2>
+                <button class="btn" onclick="showMenu()">Volver al Menú</button>
+            </div>
+            <div class="search-box">
+                <input type="email" id="searchEmail" placeholder="Buscar por correo electrónico..." oninput="searchUsers()">
+            </div>
+            <div id="searchResults"></div>
+        </div>
+
+        <!-- Sección: Anuncios -->
+        <div class="content-section" id="announcementsSection">
+            <div class="section-header">
+                <h2>📢 Anuncios</h2>
+                <div>
+                    <button class="btn" id="addAnnouncementBtn" style="display: none;" onclick="openAnnouncementModal()">➕ Nuevo Anuncio</button>
+                    <button class="btn btn-secondary" onclick="showMenu()">Volver al Menú</button>
+                </div>
+            </div>
+            <div id="announcementsList"></div>
+        </div>
+
+        <!-- Sección: Gestionar Usuarios (Owner) -->
+        <div class="content-section" id="manageUsersSection">
+            <div class="section-header">
+                <h2>👥 Gestionar Usuarios</h2>
+                <div>
+                    <button class="btn" onclick="openCreateUserModal()">➕ Crear Usuario</button>
+                    <button class="btn btn-secondary" onclick="showMenu()">Volver al Menú</button>
+                </div>
+            </div>
+            <div id="usersList"></div>
+        </div>
+
+        <!-- Sección: Panel de Admin -->
+        <div class="content-section" id="adminSection">
+            <div class="section-header">
+                <h2>⚙️ Panel de Administración</h2>
+                <button class="btn" onclick="showMenu()">Volver al Menú</button>
+            </div>
+            <div id="adminUsersList"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Crear/Editar Usuario -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Crear Usuario</h2>
+                <button class="close-modal" onclick="closeModal('userModal')">×</button>
+            </div>
+            <form onsubmit="saveUser(event)">
+                <input type="hidden" id="editingUserEmail">
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="modalEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="modalName" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="modalPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Avatar (emoji)</label>
+                    <input type="text" id="modalAvatar" maxlength="2" placeholder="😊">
+                </div>
+                <div class="form-group">
+                    <label>Biografía</label>
+                    <textarea id="modalBio"></textarea>
+                </div>
+                <div class="form-group" id="roleGroup">
+                    <label>Rol</label>
+                    <div class="role-select">
+                        <div class="role-option selected" data-role="user" onclick="selectRole('user')">
+                            <div style="font-size: 2em;">👤</div>
+                            <div>Usuario</div>
+                        </div>
+                        <div class="role-option" data-role="admin" onclick="selectRole('admin')">
+                            <div style="font-size: 2em;">🛡️</div>
+                            <div>Admin</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancelar</button>
+                    <button type="submit" class="btn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Crear Anuncio -->
+    <div class="modal" id="announcementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Anuncio</h2>
+                <button class="close-modal" onclick="closeModal('announcementModal')">×</button>
+            </div>
+            <form onsubmit="saveAnnouncement(event)">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="announcementTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Contenido</label>
+                    <textarea id="announcementContent" required></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('announcementModal')">Cancelar</button>
+                    <button type="submit" class="btn">Publicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let selectedRole = 'user';
+
+        // Verificar sesión
+        function checkSession() {
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(userStr);
+            initPanel();
+        }
+
+        function initPanel() {
+            // Mostrar info del usuario
+            document.getElementById('userAvatar').textContent = currentUser.avatar || '👤';
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = getRoleLabel(currentUser.role);
+
+            // Generar menú según rol
+            generateMenu();
+        }
+
+        function getRoleLabel(role) {
+            const labels = {
+                'owner': '👑 Owner',
+                'admin': '🛡️ Administrador',
+                'user': '👤 Usuario'
+            };
+            return labels[role] || 'Usuario';
+        }
+
+        function generateMenu() {
+            const menuGrid = document.getElementById('menuGrid');
+            const menus = [];
+
+            // Menú común para todos
+            menus.push({
+                icon: '👤',
+                title: 'Mi Perfil',
+                description: 'Personaliza tu perfil',
+                action: 'showProfile'
+            });
+
+            menus.push({
+                icon: '🔍',
+                title: 'Buscar Usuarios',
+                description: 'Encuentra usuarios por correo',
+                action: 'showSearch'
+            });
+
+            menus.push({
+                icon: '📢',
+                title: 'Anuncios',
+                description: 'Ver anuncios del sistema',
+                action: 'showAnnouncements'
+            });
+
+            // Menús específicos por rol
+            if (currentUser.role === 'owner') {
+                menus.push({
+                    icon: '👥',
+                    title: 'Gestionar Usuarios',
+                    description: 'Crear y administrar usuarios',
+                    action: 'showManageUsers'
+                });
+            }
+
+            if (currentUser.role === 'admin') {
+                menus.push({
+                    icon: '⚙️',
+                    title: 'Panel Admin',
+                    description: 'Gestionar usuarios y anuncios',
+                    action: 'showAdmin'
+                });
+            }
+
+            menuGrid.innerHTML = menus.map(menu => `
+                <div class="menu-card" onclick="${menu.action}()">
+                    <div class="menu-card-icon">${menu.icon}</div>
+                    <h3>${menu.title}</h3>
+                    <p>${menu.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function showMenu() {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('menuGrid').style.display = 'grid';
+        }
+
+        function hideMenu() {
+            document.getElementById('menuGrid').style.display = 'none';
+        }
+
+        function showProfile() {
+            hideMenu();
+            document.getElementById('profileSection').classList.add('active');
+            
+            // Cargar datos actuales
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileAvatar').value = currentUser.avatar || '';
+            document.getElementById('profileBio').value = currentUser.bio || '';
+        }
+
+        function updateProfile(event) {
+            event.preventDefault();
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.email === currentUser.email);
+            
+            users[userIndex].name = document.getElementById('profileName').value;
+            users[userIndex].avatar = document.getElementById('profileAvatar').value || '👤';
+            users[userIndex].bio = document.getElementById('profileBio').value;
+            
+            const newPassword = document.getElementById('profilePassword').value;
+            if (newPassword) {
+                users[userIndex].password = newPassword;
+            }
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            currentUser = users[userIndex];
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            alert('✅ Perfil actualizado correctamente');
+            initPanel();
+        }
+
+        function showSearch() {
+            hideMenu();
+            document.getElementById('searchSection').classList.add('active');
+            document.getElementById('searchResults').innerHTML = '<p style="color: #999; text-align: center;">Busca un usuario por su correo electrónico</p>';
+        }
+
+        function searchUsers() {
+            const searchEmail = document.getElementById('searchEmail').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!searchEmail) {
+                resultsDiv.innerHTML = '<p style="color: #999; text-align: center;">Busca un usuario por su correo electrónico</p>';
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const results = users.filter(u => u.email.toLowerCase().includes(searchEmail));
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #999; text-align: center;">No se encontraron usuarios</p>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = results.map(user => `
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <div class="user-card-info">
+                            <span style="font-size: 2em;">${user.avatar || '👤'}</span>
+                            <div>
+                                <strong>${user.name}</strong>
+                                <div style="color: #666; font-size: 0.9em;">${user.email}</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-${user.role}">${getRoleLabel(user.role)}</span>
+                    </div>
+                    <p style="color: #666; margin-top: 10px;">${user.bio || 'Sin biografía'}</p>
+                </div>
+            `).join('');
+        }
+
+        function showAnnouncements() {
+            hideMenu();
+            document.getElementById('announcementsSection').classList.add('active');
+            
+            // Mostrar botón de crear si es admin u owner
+            if (currentUser.role === 'admin' || currentUser.role === 'owner') {
+                document.getElementById('addAnnouncementBtn').style.display = 'inline-block';
+            }
+            
+            loadAnnouncements();
+        }
+
+        function loadAnnouncements() {
+            const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+            const listDiv = document.getElementById('announcementsList');
+            
+            if (announcements.length === 0) {
+                listDiv.innerHTML = '<p style="color: #999; text-align: center;">No hay anuncios</p>';
+                return;
+            }
+            
+            listDiv.innerHTML = announcements.map(ann => `
+                <div class="announcement-card">
+                    <h3>${ann.title}</h3>
+                    <p>${ann.content}</p>
+                    <div class="announcement-meta">
+                        Por ${ann.author} - ${new Date(ann.date).toLocaleDateString('es-ES')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAnnouncementModal() {
+            document.getElementById('announcementModal').classList.add('active');
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementContent').value = '';
+        }
+
+        function saveAnnouncement(event) {
+            event.preventDefault();
+            
+            const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+            const newAnnouncement = {
+                id: Date.now(),
+                title: document.getElementById('announcementTitle').value,
+                content: document.getElementById('announcementContent').value,
+                author: currentUser.name,
+                date: new Date().toISOString()
+            };
+            
+            announcements.unshift(newAnnouncement);
+            localStorage.setItem('announcements', JSON.stringify(announcements));
+            
+            closeModal('announcementModal');
+            loadAnnouncements();
+            alert('✅ Anuncio publicado');
+        }
+
+        function showManageUsers() {
+            hideMenu();
+            document.getElementById('manageUsersSection').classList.add('active');
+            loadUsersList();
+        }
+
+        function loadUsersList() {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const listDiv = document.getElementById('usersList');
+            
+            listDiv.innerHTML = users.map(user => `
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <div class="user-card-info">
+                            <span style="font-size: 2em;">${user.avatar || '👤'}</span>
+                            <div>
+                                <strong>${user.name}</strong>
+                                <div style="color: #666; font-size: 0.9em;">${user.email}</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-${user.role}">${getRoleLabel(user.role)}</span>
+                    </div>
+                    <p style="color: #666; margin: 10px 0;">${user.bio || 'Sin biografía'}</p>
+                    ${user.role !== 'owner' ? `
+                        <div class="actions">
+                            <button class="btn btn-sm" onclick='editUser(${JSON.stringify(user).replace(/'/g, "&#39;")})'>✏️ Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.email}')">🗑️ Eliminar</button>
+                            ${user.role === 'user' ? `<button class="btn btn-sm" onclick="promoteToAdmin('${user.email}')">⬆️ Hacer Admin</button>` : ''}
+                            ${user.role === 'admin' ? `<button class="btn btn-sm btn-secondary" onclick="demoteToUser('${user.email}')">⬇️ Quitar Admin</button>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function showAdmin() {
+            hideMenu();
+            document.getElementById('adminSection').classList.add('active');
+            loadAdminUsersList();
+        }
+
+        function loadAdminUsersList() {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const listDiv = document.getElementById('adminUsersList');
+            
+            listDiv.innerHTML = users.filter(u => u.role !== 'owner').map(user => `
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <div class="user-card-info">
+                            <span style="font-size: 2em;">${user.avatar || '👤'}</span>
+                            <div>
+                                <strong>${user.name}</strong>
+                                <div style="color: #666; font-size: 0.9em;">${user.email}</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-${user.role}">${getRoleLabel(user.role)}</span>
+                    </div>
+                    <p style="color: #666; margin: 10px 0;">${user.bio || 'Sin biografía'}</p>
+                    <div class="actions">
+                        <button class="btn btn-sm" onclick="changeUserBio('${user.email}')">📝 Cambiar Bio</button>
+                        <button class="btn btn-sm" onclick="changeUserPassword('${user.email}')">🔑 Cambiar Contraseña</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCreateUserModal() {
+            document.getElementById('userModalTitle').textContent = 'Crear Usuario';
+            document.getElementById('editingUserEmail').value = '';
+            document.getElementById('modalEmail').value = '';
+            document.getElementById('modalEmail').disabled = false;
+            document.getElementById('modalName').value = '';
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalPassword').required = true;
+            document.getElementById('modalAvatar').value = '';
+            document.getElementById('modalBio').value = '';
+            document.getElementById('roleGroup').style.display = 'block';
+            selectRole('user');
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function editUser(user) {
+            document.getElementById('userModalTitle').textContent = 'Editar Usuario';
+            document.getElementById('editingUserEmail').value = user.email;
+            document.getElementById('modalEmail').value = user.email;
+            document.getElementById('modalEmail').disabled = true;
+            document.getElementById('modalName').value = user.name;
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalPassword').required = false;
+            document.getElementById('modalPassword').placeholder = 'Dejar vacío para no cambiar';
+            document.getElementById('modalAvatar').value = user.avatar || '';
+            document.getElementById('modalBio').value = user.bio || '';
+            document.getElementById('roleGroup').style.display = 'block';
+            selectRole(user.role);
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.role === role) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        function saveUser(event) {
+            event.preventDefault();
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const editingEmail = document.getElementById('editingUserEmail').value;
+            const email = document.getElementById('modalEmail').value;
+            const name = document.getElementById('modalName').value;
+            const password = document.getElementById('modalPassword').value;
+            const avatar = document.getElementById('modalAvatar').value || '👤';
+            const bio = document.getElementById('modalBio').value;
+            
+            if (editingEmail) {
+                // Editar usuario existente
+                const userIndex = users.findIndex(u => u.email === editingEmail);
+                users[userIndex].name = name;
+                if (password) users[userIndex].password = password;
+                users[userIndex].avatar = avatar;
+                users[userIndex].bio = bio;
+                users[userIndex].role = selectedRole;
+            } else {
+                // Crear nuevo usuario
+                if (users.find(u => u.email === email)) {
+                    alert('❌ Ya existe un usuario con ese correo');
+                    return;
+                }
+                users.push({
+                    email,
+                    password,
+                    name,
+                    avatar,
+                    bio,
+                    role: selectedRole
+                });
+            }
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            closeModal('userModal');
+            loadUsersList();
+            alert('✅ Usuario guardado');
+        }
+
+        function deleteUser(email) {
+            if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+            
+            let users = JSON.parse(localStorage.getItem('users'));
+            users = users.filter(u => u.email !== email);
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsersList();
+            alert('✅ Usuario eliminado');
+        }
+
+        function promoteToAdmin(email) {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.email === email);
+            users[userIndex].role = 'admin';
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsersList();
+            alert('✅ Usuario promovido a Admin');
+        }
+
+        function demoteToUser(email) {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.email === email);
+            users[userIndex].role = 'user';
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsersList();
+            alert('✅ Permisos de Admin removidos');
+        }
+
+        function changeUserBio(email) {
+            const newBio = prompt('Nueva biografía:');
+            if (newBio === null) return;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.email === email);
+            users[userIndex].bio = newBio;
+            localStorage.setItem('users', JSON.stringify(users));
+            loadAdminUsersList();
+            alert('✅ Biografía actualizada');
+        }
+
+        function changeUserPassword(email) {
+            const newPassword = prompt('Nueva contraseña:');
+            if (!newPassword) return;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.email === email);
+            users[userIndex].password = newPassword;
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('✅ Contraseña actualizada');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Iniciar al cargar
+        checkSession();
+    </script>
+</body>
+</html>
